@@ -73,7 +73,13 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 **Normal**:
 
+* Albaz
+
 * Altergeist
+
+* Apophis
+
+* BE2025
 
 * Blue-Eyes
 
@@ -85,21 +91,41 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * DarkMagician
 
+* Dogmatika
+
 * Dragun
 
 * Dragunity
+
+* Exosister
+
+* FamiliarPossessed
 
 * GrenMajuThunderBoarder
 
 * JTP
 
+* Kashtira
+
+* Labrynth
+
 * Level VIII
 
 * LightswornShaddoldinosour
 
+* Maliss
+
+* MalissOCG
+
+* MathMech
+
+* Neko
+
 * Orcust
 
 * Phantasm
+
+* PureWinds
 
 * Qliphort
 
@@ -107,19 +133,35 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * Rank V
 
+* Ryzeal
+
 * Salamangreat
 
 * SkyStriker
 
 * ST1732
 
+* SuperheavySamurai
+
+* Swordsoul
+
+* Tearlaments
+
 * ThunderDragon
+
+* TimeThief
 
 * Toadally Awesome
 
 * Trickstar
 
+* Witchcraft
+
 * Yosenju
+
+* Yubel
+
+* Zefra
 
 * Zexal Weapons
 
