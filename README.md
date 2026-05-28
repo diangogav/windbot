@@ -170,6 +170,11 @@ netsh http add urlacl url=http://+:2399/ user=Everyone
 
 ### Changelog
 
+#### v0x1362 (2026-05-27)
+
+ - Update YGOPro protocol to 0x1362
+ - New decks: Albaz, Apophis, BE2025, Dogmatika, Exosister, FamiliarPossessed, JTP, Kashtira, Labrynth, Maliss, MalissOCG, MathMech, Neko, PureWinds, Ryzeal, SuperheavySamurai, Swordsoul, Tearlaments, TimeThief, Witchcraft, Yubel, Zefra
+
 #### v0x134A (2019-05-30)
 
  - Update YGOPro protrol to 0x134A
