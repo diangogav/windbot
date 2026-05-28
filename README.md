@@ -91,6 +91,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * GrenMajuThunderBoarder
 
+* JTP
+
 * Level VIII
 
 * LightswornShaddoldinosour
