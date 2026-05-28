@@ -1,44 +1,44 @@
-# Sincronizar con el WindBot original (upstream)
+# Sync with the original WindBot (upstream)
 
-Este fork es un repositorio **independiente** (`origin = diangogav/windbot`), no un
-fork de GitHub. El proyecto original vive en `upstream` y lo usamos solo para
-**traer sus cambios** cuando queramos. No pusheamos nunca a `upstream` (su push
-está deshabilitado a propósito).
+This fork is a **standalone** repository (`origin = diangogav/windbot`), not a
+GitHub fork. The original project lives in `upstream` and we use it only to
+**pull its changes** whenever we want. We never push to `upstream` (its push URL
+is disabled on purpose).
 
 ## Remotes
 
-| Remote     | URL                                              | Uso                    |
-|------------|--------------------------------------------------|------------------------|
-| `origin`   | `git@github.com:diangogav/windbot.git`           | Tu repo (lectura/push) |
-| `upstream` | `https://code.moenext.com/nanahira/windbot.git`  | Original (solo lectura)|
+| Remote     | URL                                              | Use                     |
+|------------|--------------------------------------------------|-------------------------|
+| `origin`   | `git@github.com:diangogav/windbot.git`           | Your repo (read/push)   |
+| `upstream` | `https://code.moenext.com/nanahira/windbot.git`  | Original (read-only)    |
 
-## Ciclo del día a día
+## Daily cycle
 
-La forma corta — usá el script:
-
-```bash
-./scripts/sync-upstream.sh          # trae y mergea los cambios del original
-./scripts/sync-upstream.sh --push   # además sube el resultado a tu origin
-```
-
-La forma manual (lo que el script hace por dentro):
+The short way — use the script:
 
 ```bash
-git fetch upstream                  # 1. descarga el original (NO toca tu código)
-git merge upstream/master           # 2. integra los cambios a tu rama
-# 3. si hay conflictos, resolvelos y: git add <archivo> && git commit
-git push origin master              # 4. subí el resultado a tu repo
+./scripts/sync-upstream.sh          # pull and merge the original's changes
+./scripts/sync-upstream.sh --push   # also push the result to your origin
 ```
 
-## Por qué `merge` y no `rebase`
+The manual way (what the script does under the hood):
 
-Usamos **merge**: conserva el historial tal como pasó y no obliga a `push --force`.
-`rebase` reescribe commits y, sobre código ya pusheado, es una forma elegante de
-romper cosas. Si no dominás git de memoria, quedate con `merge`.
+```bash
+git fetch upstream                  # 1. download the original (does NOT touch your code)
+git merge upstream/master           # 2. integrate the changes into your branch
+# 3. if there are conflicts, resolve them and: git add <file> && git commit
+git push origin master              # 4. push the result to your repo
+```
 
-## Conflictos
+## Why `merge` and not `rebase`
 
-Si tocaste el mismo archivo que tocó el original (típico: `WindBot.csproj`), git
-marca el conflicto. **No es un error** — es git pidiéndote que decidas vos qué
-versión queda. Cuanto más diverja tu fork, más conflictos vas a ver. Es el precio
-natural de tener tu propia versión.
+We use **merge**: it preserves history as it actually happened and never forces a
+`push --force`. `rebase` rewrites commits and, on already-pushed code, it's an
+elegant way to break things. If you don't know git by heart, stick with `merge`.
+
+## Conflicts
+
+If you touched the same file the original touched (typical: `WindBot.csproj`), git
+marks the conflict. **It's not an error** — it's git asking you to decide which
+version stays. The more your fork diverges, the more conflicts you'll see. That's
+the natural price of having your own version.

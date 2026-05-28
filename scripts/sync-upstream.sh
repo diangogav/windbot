@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 #
-# sync-upstream.sh — Trae los cambios del WindBot original a tu fork.
+# sync-upstream.sh — Pull changes from the original WindBot into your fork.
 #
-# Ciclo del día a día:
-#   1. fetch upstream   -> descarga la historia del original (NO toca tu código)
-#   2. merge            -> integra esos cambios a tu rama actual
-#   3. (vos) resolvés conflictos si aparecen
-#   4. push origin      -> sube el resultado a tu repo
+# Daily cycle:
+#   1. fetch upstream   -> downloads the original's history (does NOT touch your code)
+#   2. merge            -> integrates those changes into your current branch
+#   3. (you) resolve conflicts if any appear
+#   4. push origin      -> uploads the result to your repo
 #
-# Usa merge (no rebase) a propósito: conserva el historial y no te obliga
-# a push --force. Es el camino seguro.
+# Uses merge (not rebase) on purpose: it preserves history and never forces you
+# into a push --force. It's the safe path.
 #
-# Uso:
-#   ./scripts/sync-upstream.sh            # sincroniza la rama actual
-#   ./scripts/sync-upstream.sh --push     # además pushea a origin al terminar
+# Usage:
+#   ./scripts/sync-upstream.sh            # sync the current branch
+#   ./scripts/sync-upstream.sh --push     # also push to origin when done
 
 set -euo pipefail
 
@@ -23,54 +23,54 @@ DO_PUSH=false
 
 [[ "${1:-}" == "--push" ]] && DO_PUSH=true
 
-# --- 0. Salvaguarda: el working tree debe estar limpio ---------------------
+# --- 0. Safeguard: the working tree must be clean --------------------------
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo "✋ Tenés cambios sin commitear. Commiteá o stasheá antes de sincronizar."
-  echo "   git status   para ver qué hay pendiente."
+  echo "✋ You have uncommitted changes. Commit or stash them before syncing."
+  echo "   git status   to see what's pending."
   exit 1
 fi
 
 if ! git remote get-url "$UPSTREAM_REMOTE" >/dev/null 2>&1; then
-  echo "✋ No existe el remote '$UPSTREAM_REMOTE'."
+  echo "✋ Remote '$UPSTREAM_REMOTE' does not exist."
   echo "   git remote add upstream https://code.moenext.com/nanahira/windbot.git"
   exit 1
 fi
 
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
-# --- 1. Traer cambios del original (seguro: no modifica tu código) ---------
+# --- 1. Pull changes from the original (safe: does not modify your code) ----
 echo "→ git fetch $UPSTREAM_REMOTE"
 git fetch "$UPSTREAM_REMOTE"
 
-# --- ¿Hay algo nuevo? ------------------------------------------------------
+# --- Is there anything new? ------------------------------------------------
 BEHIND="$(git rev-list --count "HEAD..$UPSTREAM_REMOTE/$UPSTREAM_BRANCH")"
 if [[ "$BEHIND" -eq 0 ]]; then
-  echo "✓ Ya estás al día con $UPSTREAM_REMOTE/$UPSTREAM_BRANCH. Nada que traer."
+  echo "✓ Already up to date with $UPSTREAM_REMOTE/$UPSTREAM_BRANCH. Nothing to pull."
   exit 0
 fi
-echo "→ Hay $BEHIND commit(s) nuevos en $UPSTREAM_REMOTE/$UPSTREAM_BRANCH."
+echo "→ There are $BEHIND new commit(s) in $UPSTREAM_REMOTE/$UPSTREAM_BRANCH."
 
-# --- 2. Integrar con merge -------------------------------------------------
+# --- 2. Integrate with merge -----------------------------------------------
 echo "→ git merge $UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
 if git merge "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"; then
-  echo "✓ Merge limpio, sin conflictos."
+  echo "✓ Clean merge, no conflicts."
 else
   echo ""
-  echo "⚠ Hay CONFLICTOS. Esto es normal, no es un error."
-  echo "  1. Abrí los archivos marcados (git status los lista)."
-  echo "  2. Decidí qué versión queda en cada conflicto."
-  echo "  3. git add <archivo> y luego: git commit"
-  echo "  4. Volvé a correr este script con --push, o pusheá a mano."
+  echo "⚠ There are CONFLICTS. This is normal, not an error."
+  echo "  1. Open the marked files (git status lists them)."
+  echo "  2. Decide which version stays in each conflict."
+  echo "  3. git add <file> and then: git commit"
+  echo "  4. Re-run this script with --push, or push manually."
   exit 1
 fi
 
-# --- 3. Push opcional ------------------------------------------------------
+# --- 3. Optional push ------------------------------------------------------
 if $DO_PUSH; then
   echo "→ git push origin $CURRENT_BRANCH"
   git push origin "$CURRENT_BRANCH"
-  echo "✓ Subido a origin/$CURRENT_BRANCH."
+  echo "✓ Pushed to origin/$CURRENT_BRANCH."
 else
   echo ""
-  echo "✓ Listo en local. Para subirlo:  git push origin $CURRENT_BRANCH"
-  echo "  (o corré este script con --push la próxima)"
+  echo "✓ Done locally. To upload it:  git push origin $CURRENT_BRANCH"
+  echo "  (or run this script with --push next time)"
 fi
