@@ -161,6 +161,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * Yubel
 
+* Yugi
+
 * Zefra
 
 * Zexal Weapons
@@ -211,6 +213,10 @@ netsh http add urlacl url=http://+:2399/ user=Everyone
 * If one chain includes two activation that use `AI.SelectCard`, the second one won't select correctly.
 
 ### Changelog
+
+#### This fork (2026-06-12)
+
+ - New deck: Yugi
 
 #### This fork (2026-05-27)
 

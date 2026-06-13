@@ -119,6 +119,7 @@
     <Compile Include="Game\AI\Decks\TrickstarExecutor.cs" />
     <Compile Include="Game\AI\Decks\WitchcraftExecutor.cs" />
     <Compile Include="Game\AI\Decks\YosenjuExecutor.cs" />
+    <Compile Include="Game\AI\Decks\YugiExecutor.cs" />
     <Compile Include="Game\AI\Decks\DragunityExecutor.cs" />
     <Compile Include="Game\AI\Decks\FrogExecutor.cs" />
     <Compile Include="Game\AI\Decks\HorusExecutor.cs" />
