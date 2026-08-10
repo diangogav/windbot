@@ -97,6 +97,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * Dragunity
 
+* EdisonBlackwing
+
 * Exosister
 
 * FamiliarPossessed
