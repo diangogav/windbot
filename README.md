@@ -101,6 +101,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * EdisonLightsworn
 
+* EdisonMachina
+
 * Exosister
 
 * FamiliarPossessed
@@ -217,6 +219,11 @@ netsh http add urlacl url=http://+:2399/ user=Everyone
 * If one chain includes two activation that use `AI.SelectCard`, the second one won't select correctly.
 
 ### Changelog
+
+#### This fork (2026-08-09)
+
+ - New decks for the Edison format (TCG April 2010): EdisonBlackwing, EdisonLightsworn, EdisonMachina
+ - Deck lists validated against the Edison whitelist (evolution-assets `edison.lflist.conf`), including pre-errata passcodes
 
 #### This fork (2026-06-12)
 

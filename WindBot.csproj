@@ -134,6 +134,7 @@
     <Compile Include="Game\AI\Decks\JTPExecutor.cs" />
     <Compile Include="Game\AI\Decks\EdisonBlackwingExecutor.cs" />
     <Compile Include="Game\AI\Decks\EdisonLightswornExecutor.cs" />
+    <Compile Include="Game\AI\Decks\EdisonMachinaExecutor.cs" />
     <Compile Include="Game\AI\DefaultExecutor.cs" />
     <Compile Include="Game\AI\Dialogs.cs" />
     <Compile Include="Game\AI\Enums\DangerousMonster.cs" />
