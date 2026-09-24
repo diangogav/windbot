@@ -124,6 +124,11 @@
         "dialog": "wof-Aria"
       },
       {
+        "name": "苏娜",
+        "deck": "Elfnote",
+        "dialog": "wof-Suna"
+      },
+      {
         "name": "鹭泽由依",
         "deck": "Yosenju",
         "dialog": "wof-Sagisawa-Yui"
