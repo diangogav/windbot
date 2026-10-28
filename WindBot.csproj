@@ -138,6 +138,7 @@
     <Compile Include="Game\AI\Decks\HalloweenHordeExecutor.cs" />
     <Compile Include="Game\AI\Decks\HalloweenVampiresExecutor.cs" />
     <Compile Include="Game\AI\Decks\HalloweenHauntedExecutor.cs" />
+    <Compile Include="Game\AI\Decks\HalloweenSkeletonsExecutor.cs" />
     <Compile Include="Game\AI\DefaultExecutor.cs" />
     <Compile Include="Game\AI\Dialogs.cs" />
     <Compile Include="Game\AI\Enums\DangerousMonster.cs" />
