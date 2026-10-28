@@ -770,6 +770,38 @@ namespace WindBot.Game.AI
         }
 
         /// <summary>
+        /// Spell/Trap removal with human timing: a floodgate is hit at once; a
+        /// face-down card is hit from the field in the opponent's End Phase
+        /// (after they set it, before it can be used on our turn) or from the
+        /// hand in our Main Phase 1, never during our Draw or Standby Phase.
+        /// </summary>
+        protected bool DefaultEndPhaseSpellTrapRemoval()
+        {
+            if (Duel.CurrentChain.Any(card => card.IsCode(Card.Id)))
+                return false;
+
+            List<ClientCard> spells = Enemy.GetSpells();
+            if (spells.Count == 0)
+                return false;
+
+            ClientCard selected = Enemy.SpellZone.GetFloodgate();
+            if (selected == null && Duel.Player == 1)
+            {
+                selected = spells.FirstOrDefault(card => card.IsFaceup()
+                    && (card.HasType(CardType.Continuous) || card.HasType(CardType.Equip) || card.HasType(CardType.Field)));
+                if (selected == null && Duel.Phase == DuelPhase.End)
+                    selected = spells.FirstOrDefault(card => card.IsFacedown());
+            }
+            if (selected == null && Duel.Player == 0 && Duel.Phase == DuelPhase.Main1)
+                selected = spells.FirstOrDefault(card => card.IsFacedown());
+
+            if (selected == null)
+                return false;
+            AI.SelectCard(selected);
+            return true;
+        }
+
+        /// <summary>
         /// Destroy face-down cards first, in our turn.
         /// </summary>
         protected bool DefaultCosmicCyclone()
