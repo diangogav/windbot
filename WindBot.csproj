@@ -144,6 +144,7 @@
     <Compile Include="Game\AI\Decks\HalloweenArchfiendsExecutor.cs" />
     <Compile Include="Game\AI\Decks\HalloweenLichExecutor.cs" />
     <Compile Include="Game\AI\Decks\HalloweenPilotDarkWorldExecutor.cs" />
+    <Compile Include="Game\AI\Decks\HalloweenPilotCursedGardenExecutor.cs" />
     <Compile Include="Game\AI\DefaultExecutor.cs" />
     <Compile Include="Game\AI\Dialogs.cs" />
     <Compile Include="Game\AI\Enums\DangerousMonster.cs" />
