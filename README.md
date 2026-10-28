@@ -119,6 +119,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * HalloweenVampires
 
+* HalloweenWitches
+
 * JTP
 
 * Kashtira
