@@ -117,6 +117,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * HalloweenHorde
 
+* HalloweenLich
+
 * HalloweenSkeletons
 
 * HalloweenVampires
@@ -233,6 +235,11 @@ netsh http add urlacl url=http://+:2399/ user=Everyone
 * If one chain includes two activation that use `AI.SelectCard`, the second one won't select correctly.
 
 ### Changelog
+
+#### This fork (2026-10-27)
+
+ - New Halloween event decks for the Edison format, ordered by rising difficulty: HalloweenHorde, HalloweenVampires, HalloweenHaunted, HalloweenSkeletons, HalloweenGravekeepers, HalloweenWitches, HalloweenArchfiends, HalloweenLich
+ - Deck lists validated against the Edison whitelist (evolution-assets `edison.lflist.conf`), including pre-errata passcodes
 
 #### This fork (2026-08-09)
 
