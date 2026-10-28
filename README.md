@@ -131,6 +131,8 @@ WindBot can run as a "server", provide a http interface to create bot.
 
 * PilotDarkWorld
 
+* PilotNecromancer
+
 * Kashtira
 
 * Labrynth
