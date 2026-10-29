@@ -224,6 +224,17 @@ namespace WindBot.Game.AI
 
             public const int DiabellzeOfTheOriginalSin = 53765052;
             public const int PotOfExtravagance = 49238328;
+
+            public const int MirrorForce = 44095762;
+            public const int MagicCylinder = 62279055;
+            public const int SakuretsuArmor = 56120475;
+            public const int NegateAttack = 14315573;
+            public const int DimensionWall = 67095270;
+            public const int DrainingShield = 43250041;
+            public const int Waboku = 12607053;
+            public const int DustTornado = 60082869;
+            public const int Twister = 45939841;
+            public const int NightBeam = 89882100;
         }
 
         protected class _Setcode
@@ -278,6 +289,45 @@ namespace WindBot.Game.AI
 
         /// <summary>Columns 0-4 on Bot's field negated by Infinite Impermanence (enemy's col converted to ours: 4-col). Cleared at turn start.</summary>
         protected List<int> infiniteImpermanenceNegatedColumns = new List<int>();
+
+        /// <summary>
+        /// Traps that answer one declared attack. One of them per attack is enough:
+        /// a second one chained to the same attack is a wasted card.
+        /// </summary>
+        protected static readonly int[] AttackAnswerCardIds =
+        {
+            _CardId.MirrorForce,
+            _CardId.MagicCylinder,
+            _CardId.SakuretsuArmor,
+            _CardId.NegateAttack,
+            _CardId.DimensionWall,
+            _CardId.DrainingShield,
+            _CardId.Waboku
+        };
+
+        /// <summary>
+        /// Spells/Traps whose effect is to destroy or banish Spells/Traps on the field.
+        /// </summary>
+        protected static readonly int[] SpellTrapRemovalCardIds =
+        {
+            _CardId.HeavyStorm,
+            _CardId.HarpiesFeatherDuster,
+            _CardId.MysticalSpaceTyphoon,
+            _CardId.CosmicCyclone,
+            _CardId.GalaxyCyclone,
+            _CardId.DustTornado,
+            _CardId.Twister,
+            _CardId.NightBeam
+        };
+
+        // Player of each link of the current chain, and the index in Duel.ChainTargets
+        // where that link's targets start (targets are announced right after the link).
+        private readonly List<int> chainLinkPlayers = new List<int>();
+        private readonly List<int> chainLinkTargetStart = new List<int>();
+
+        // Enemy monsters on the field when the turn started, with their position then.
+        // A monster missing here entered the field this turn.
+        private readonly Dictionary<ClientCard, int> enemyPositionsAtTurnStart = new Dictionary<ClientCard, int>();
 
         /// <summary>
         /// Defined:
@@ -524,7 +574,146 @@ namespace WindBot.Game.AI
             if ((card.Location == CardLocation.Hand || card.Location == CardLocation.SpellZone && card.IsFacedown()) &&
                 (card.IsSpell() && DefaultSpellWillBeNegated() || card.IsTrap() && DefaultTrapWillBeNegated()))
                 return false;
+            if (card.IsTrap() && card.HasType(CardType.Counter) && IsEnemyRemovalOnlyHitting(card))
+                return false;
+            if (card.IsCode(AttackAnswerCardIds) && IsAttackAlreadyAnswered())
+                return false;
             return true;
+        }
+
+        /// <summary>
+        /// Targets announced by the given player's links in the current chain.
+        /// </summary>
+        protected IList<ClientCard> GetChainTargetsOf(int player)
+        {
+            List<ClientCard> result = new List<ClientCard>();
+            int links = chainLinkPlayers.Count;
+            if (links != Duel.CurrentChain.Count)
+                return result;
+            int total = Duel.ChainTargets.Count;
+            for (int i = 0; i < links; ++i)
+            {
+                if (chainLinkPlayers[i] != player)
+                    continue;
+                int start = Math.Min(chainLinkTargetStart[i], total);
+                int end = i + 1 < links ? Math.Min(chainLinkTargetStart[i + 1], total) : total;
+                for (int j = start; j < end; ++j)
+                    result.Add(Duel.ChainTargets[j]);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Whether the current chain already takes care of this card: one of our links
+        /// targets it, or a pending mass destruction (Heavy Storm, Harpie's Feather Duster,
+        /// Dark Hole, Raigeki) will destroy it anyway. A second effect on it is wasted.
+        /// </summary>
+        protected bool IsHandledInCurrentChain(ClientCard card)
+        {
+            if (card == null)
+                return false;
+            if (GetChainTargetsOf(0).Contains(card))
+                return true;
+            foreach (ChainInfo link in Duel.CurrentChainInfo)
+            {
+                if (link.RelatedCard == card)
+                    continue;
+                bool opponentOfActivator = card.Controller != link.ActivatePlayer;
+                if (card.Location == CardLocation.SpellZone)
+                {
+                    if (link.IsCode(_CardId.HeavyStorm))
+                        return true;
+                    if (link.IsCode(_CardId.HarpiesFeatherDuster) && opponentOfActivator)
+                        return true;
+                }
+                else if (card.Location == CardLocation.MonsterZone)
+                {
+                    if (link.IsCode(_CardId.DarkHole))
+                        return true;
+                    if (link.IsCode(_CardId.Raigeki) && opponentOfActivator)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Whether we already chained a trap that answers the current attack.
+        /// </summary>
+        protected bool IsAttackAlreadyAnswered()
+        {
+            return Duel.CurrentChainInfo.Any(link => link.ActivatePlayer == 0 && link.IsCode(AttackAnswerCardIds));
+        }
+
+        /// <summary>
+        /// Whether the last chain link is an enemy Spell/Trap removal whose only victim on
+        /// our side is this card. Negating it would only save the negating card itself,
+        /// paying its cost and protecting the enemy's own backrow from a Heavy Storm.
+        /// </summary>
+        protected bool IsEnemyRemovalOnlyHitting(ClientCard card)
+        {
+            if (Duel.LastChainPlayer != 1)
+                return false;
+            ChainInfo last = Duel.CurrentChainInfo.LastOrDefault();
+            if (last == null || !last.IsCode(SpellTrapRemovalCardIds))
+                return false;
+            if (last.IsCode(_CardId.HeavyStorm) || last.IsCode(_CardId.HarpiesFeatherDuster))
+                return !Bot.GetSpells().Any(spell => spell != card);
+            return Duel.LastChainTargets.Where(target => target.Controller == 0).All(target => target == card);
+        }
+
+        /// <summary>
+        /// Whether the enemy can still change this monster's battle position this turn
+        /// (Flip Summon or manual change): it is their Main Phase, the monster was already
+        /// on the field when the turn started and has not changed position since.
+        /// </summary>
+        protected bool CanEnemyChangePositionThisTurn(ClientCard monster)
+        {
+            if (monster == null || monster.Controller != 1 || Duel.Player != 1)
+                return false;
+            if (Duel.Phase != DuelPhase.Main1 && Duel.Phase != DuelPhase.Main2)
+                return false;
+            int position;
+            if (!enemyPositionsAtTurnStart.TryGetValue(monster, out position))
+                return false;
+            return position == monster.Position;
+        }
+
+        /// <summary>
+        /// Whether one of our face-down FLIP monsters is waiting for a Flip Summon this
+        /// executor wants right now. Tribute Summons should wait for it, so the monster
+        /// gets its FLIP effect before it is tributed.
+        /// </summary>
+        protected bool HasFlipSummonPending()
+        {
+            if (Duel.MainPhase == null)
+                return false;
+            ExecutorType savedType = Type;
+            ClientCard savedCard = Card;
+            int savedDescription = ActivateDescription;
+            int savedTiming = CurrentTiming;
+            try
+            {
+                foreach (ClientCard monster in Duel.MainPhase.ReposableCards)
+                {
+                    if (monster == null || monster == savedCard || monster.Controller != 0
+                        || !monster.IsFacedown() || !monster.HasType(CardType.Flip))
+                        continue;
+                    foreach (CardExecutor exec in Executors)
+                    {
+                        if (exec.Type != ExecutorType.Repos || exec.CardId != monster.Id)
+                            continue;
+                        SetCard(ExecutorType.Repos, monster, -1);
+                        if (exec.Func == null || exec.Func())
+                            return true;
+                    }
+                }
+                return false;
+            }
+            finally
+            {
+                SetCard(savedType, savedCard, savedDescription, savedTiming);
+            }
         }
 
         /// <summary>
@@ -680,9 +869,23 @@ namespace WindBot.Game.AI
             }
         }
 
+        public override void OnChaining(int player, ClientCard card)
+        {
+            if (Duel.CurrentChain.Count == 0)
+            {
+                chainLinkPlayers.Clear();
+                chainLinkTargetStart.Clear();
+            }
+            chainLinkPlayers.Add(player);
+            chainLinkTargetStart.Add(Duel.ChainTargets.Count);
+            base.OnChaining(player, card);
+        }
+
         public override void OnChainEnd()
         {
             lightningStormOption = -1;
+            chainLinkPlayers.Clear();
+            chainLinkTargetStart.Clear();
             base.OnChainEnd();
         }
 
@@ -710,6 +913,10 @@ namespace WindBot.Game.AI
             }
             crossoutDesignatorIdList.Clear();
 
+            enemyPositionsAtTurnStart.Clear();
+            foreach (ClientCard monster in Enemy.GetMonsters())
+                enemyPositionsAtTurnStart[monster] = monster.Position;
+
             base.OnNewTurn();
         }
 
@@ -717,6 +924,8 @@ namespace WindBot.Game.AI
         {
             if (card != null)
             {
+                if (previousLocation != currentLocation || previousControler != currentControler)
+                    enemyPositionsAtTurnStart.Remove(card);
                 ClientCard currentSolvingChain = Duel.GetCurrentSolvingChainCard();
                 if (currentSolvingChain != null && currentLocation == (int)CardLocation.Removed)
                 {
@@ -749,11 +958,11 @@ namespace WindBot.Game.AI
                 return false;
             }
 
-            List<ClientCard> spells = Enemy.GetSpells();
+            List<ClientCard> spells = Enemy.GetSpells().Where(card => !IsHandledInCurrentChain(card)).ToList();
             if (spells.Count == 0)
                 return false;
 
-            ClientCard selected = Enemy.SpellZone.GetFloodgate();
+            ClientCard selected = spells.GetFloodgate();
 
             if (selected == null)
             {
@@ -780,11 +989,11 @@ namespace WindBot.Game.AI
             if (Duel.CurrentChain.Any(card => card.IsCode(Card.Id)))
                 return false;
 
-            List<ClientCard> spells = Enemy.GetSpells();
+            List<ClientCard> spells = Enemy.GetSpells().Where(card => !IsHandledInCurrentChain(card)).ToList();
             if (spells.Count == 0)
                 return false;
 
-            ClientCard selected = Enemy.SpellZone.GetFloodgate();
+            ClientCard selected = spells.GetFloodgate();
             if (selected == null && Duel.Player == 1)
             {
                 selected = spells.FirstOrDefault(card => card.IsFaceup()
@@ -817,7 +1026,7 @@ namespace WindBot.Game.AI
         /// </summary>
         protected bool DefaultGalaxyCyclone()
         {
-            List<ClientCard> spells = Enemy.GetSpells();
+            List<ClientCard> spells = Enemy.GetSpells().Where(card => !IsHandledInCurrentChain(card)).ToList();
             if (spells.Count == 0)
                 return false;
 
@@ -826,6 +1035,8 @@ namespace WindBot.Game.AI
             if (Card.Location == CardLocation.Grave)
             {
                 selected = Util.GetBestEnemySpell(true);
+                if (IsHandledInCurrentChain(selected))
+                    selected = null;
             }
             else
             {
@@ -840,20 +1051,53 @@ namespace WindBot.Game.AI
         }
 
         /// <summary>
-        /// Set the highest ATK level 4+ effect enemy monster.
+        /// Set the highest ATK level 4+ effect enemy monster, at a moment where it sticks.
+        /// On the enemy's turn: stop a declared attack, or hit in the Battle/End Phase; in
+        /// their Main Phase only a monster that cannot change its position again this turn
+        /// (otherwise they just Flip Summon it back). Never on a monster our chain already handles.
         /// </summary>
         protected bool DefaultBookOfMoon()
         {
-            if (Util.IsAllEnemyBetter(true))
+            if (Duel.Player == 1)
             {
-                ClientCard monster = Enemy.GetMonsters().GetHighestAttackMonster(true);
-                if (monster != null && monster.HasType(CardType.Effect) && !monster.HasType(CardType.Link) && (monster.HasType(CardType.Xyz) || monster.Level > 4))
+                if (Bot.UnderAttack && Enemy.BattlingMonster != null)
                 {
-                    AI.SelectCard(monster);
+                    ClientCard attacker = Enemy.BattlingMonster;
+                    if (!IsAttackWorthStopping(attacker) || attacker.HasType(CardType.Link)
+                        || attacker.IsShouldNotBeTarget() || IsHandledInCurrentChain(attacker))
+                        return false;
+                    AI.SelectCard(attacker);
                     return true;
                 }
+                if (Duel.Phase == DuelPhase.Draw || Duel.Phase == DuelPhase.Standby)
+                    return false;
             }
-            return false;
+
+            if (!Util.IsAllEnemyBetter(true))
+                return false;
+
+            ClientCard monster = Enemy.GetMonsters()
+                .Where(card => card.HasType(CardType.Effect) && !card.HasType(CardType.Link)
+                    && (card.HasType(CardType.Xyz) || card.Level > 4))
+                .Where(card => !IsHandledInCurrentChain(card) && !CanEnemyChangePositionThisTurn(card))
+                .GetHighestAttackMonster(true);
+            if (monster == null)
+                return false;
+            AI.SelectCard(monster);
+            return true;
+        }
+
+        /// <summary>
+        /// Whether the enemy's declared attack would destroy our monster or deal real damage.
+        /// </summary>
+        protected bool IsAttackWorthStopping(ClientCard attacker)
+        {
+            if (attacker == null || !attacker.IsFaceup())
+                return false;
+            ClientCard defender = Bot.BattlingMonster;
+            if (defender == null)
+                return attacker.Attack >= 1000 || attacker.Attack >= Bot.LifePoints;
+            return attacker.Attack >= defender.GetDefensePower();
         }
 
         /// <summary>
@@ -1192,6 +1436,8 @@ namespace WindBot.Game.AI
 
             if (!UniqueFaceupMonster())
                 return false;
+            if (HasFlipSummonPending())
+                return false;
             int tributecount = (int)Math.Ceiling((Card.Level - 4.0d) / 2.0d);
             for (int j = 0; j < 7; ++j)
             {
@@ -1201,6 +1447,32 @@ namespace WindBot.Game.AI
                     tributecount--;
             }
             return tributecount <= 0;
+        }
+
+        /// <summary>
+        /// Black Rose Dragon's Synchro Summon trigger destroys every card on the field,
+        /// itself included. Wipe only when it clearly pays: the enemy loses at least 2 more
+        /// cards than we do, loses more cards and more monster ATK, or their best monster
+        /// beats ours while they lose at least as many cards.
+        /// </summary>
+        protected bool DefaultBlackRoseDragonWipe()
+        {
+            int ourCards = Bot.GetFieldCount();
+            int theirCards = Enemy.GetFieldCount();
+            int cardDiff = theirCards - ourCards;
+            if (cardDiff >= 2)
+                return true;
+            if (cardDiff < 0)
+                return false;
+            if (cardDiff >= 1 && MonsterValue(Enemy) > MonsterValue(Bot))
+                return true;
+            return Util.GetBestPower(Enemy) > Util.GetBestPower(Bot);
+        }
+
+        // Rough board value of a field's monsters; a face-down enemy monster is unknown.
+        private static int MonsterValue(ClientField field)
+        {
+            return field.GetMonsters().Sum(card => card.IsFacedown() && card.Controller == 1 ? 1500 : card.GetDefensePower());
         }
 
         /// <summary>

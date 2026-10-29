@@ -350,10 +350,12 @@ namespace WindBot.Game.AI.Decks
         }
 
         // Chief: Tribute Summon when a Gravekeeper waits in the Graveyard and we
-        // have a weaker monster to tribute.
+        // have a weaker monster to tribute, after any pending FLIP Summon.
         private bool ChiefSummon()
         {
             if (!Bot.Graveyard.Any(card => IsGravekeeper(card) && !card.IsCode(CardId.Chief)))
+                return false;
+            if (HasFlipSummonPending())
                 return false;
             ClientCard worst = Util.GetWorstBotMonster();
             return worst != null && worst.GetDefensePower() < 1900;
@@ -361,9 +363,10 @@ namespace WindBot.Game.AI.Decks
 
         // Visionary can be Tribute Summoned with a single Gravekeeper (face-up or
         // set) we control; it gains 200 ATK per Gravekeeper in our Graveyard.
+        // A set Spy/Guard is flipped first so its FLIP resolves before the tribute.
         private bool VisionarySummon()
         {
-            return Bot.GetMonsters().Any(IsGravekeeper);
+            return Bot.GetMonsters().Any(IsGravekeeper) && !HasFlipSummonPending();
         }
 
         // Descendant: summon it face-up when another face-up Gravekeeper is
