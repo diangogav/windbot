@@ -331,7 +331,7 @@ namespace WindBot.Game.AI.Decks
         private bool DarkDustSpiritSummon()
         {
             List<ClientCard> enemyFaceup = Enemy.GetMonsters().Where(card => card.IsFaceup()).ToList();
-            if (enemyFaceup.Count == 0)
+            if (enemyFaceup.Count == 0 || HasFlipSummonPending())
                 return false;
 
             ClientCard tribute = GetTribute(int.MaxValue, true);
@@ -352,7 +352,7 @@ namespace WindBot.Game.AI.Decks
         // graveyard worth the 2000 LP, and a cheap tribute.
         private bool PuppetMasterSummon()
         {
-            if (Bot.LifePoints <= 3000 || Bot.GetMonsterCount() > 3)
+            if (Bot.LifePoints <= 3000 || Bot.GetMonsterCount() > 3 || HasFlipSummonPending())
                 return false;
 
             List<ClientCard> fiends = GetRevivableFiends();
@@ -366,9 +366,12 @@ namespace WindBot.Game.AI.Decks
             return true;
         }
 
-        // Level 5-6 ghosts: tribute 1 monster weaker than the one coming down.
+        // Level 5-6 ghosts: tribute 1 monster weaker than the one coming down,
+        // once any set FLIP monster we want to flip has been Flip Summoned.
         private bool TributeSummonOneMonster()
         {
+            if (HasFlipSummonPending())
+                return false;
             ClientCard tribute = GetTribute(Card.Attack, false);
             if (tribute == null)
                 return false;

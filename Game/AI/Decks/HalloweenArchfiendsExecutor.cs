@@ -485,7 +485,7 @@ namespace WindBot.Game.AI.Decks
         }
 
         // Black Rose Dragon: a 2400 body against any board, and a field wipe
-        // (see BlackRoseDragonEffect) only when we are clearly behind.
+        // (see BlackRoseDragonEffect) only when it clearly pays off.
         private bool BlackRoseDragonSummon()
         {
             return IsBehindOnBoard() || Enemy.GetMonsterCount() > 0;
@@ -496,7 +496,7 @@ namespace WindBot.Game.AI.Decks
             if (Card.Location != CardLocation.MonsterZone)
                 return false;
             if (ActivateDescription == Util.GetStringId(CardId.BlackRoseDragon, 0))
-                return IsBehindOnBoard();
+                return DefaultBlackRoseDragonWipe();
             return false;
         }
 

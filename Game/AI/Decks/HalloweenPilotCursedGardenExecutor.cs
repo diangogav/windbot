@@ -874,7 +874,7 @@ namespace WindBot.Game.AI.Decks
         private bool BlackRoseDragonEffect()
         {
             if (ActivateDescription == Util.GetStringId(CardId.BlackRoseDragon, 0))
-                return IsBehindOnBoard();
+                return DefaultBlackRoseDragonWipe();
             if (ActivateDescription == Util.GetStringId(CardId.BlackRoseDragon, 1))
             {
                 if (Duel.Phase != DuelPhase.Main1)
