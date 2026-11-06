@@ -54,6 +54,9 @@
         RaidraptorRisingRebellionFalcon = 71222868,
         Number97Draglubion = 28400508,
         SaintAzamina = 85065943,
-        LunalightLigerDancer = 54701958
+        LunalightLigerDancer = 54701958,
+        DarklordEveningstar = 10136446,
+        RedHypernovaDragon = 30698243,
+        CieloTheNightSkyOfRaiseMoonNoMoreBets = 73090586
     }
 }

@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3E7FAF67-A27D-4A61-B161-93AD4414183E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -20,7 +20,6 @@
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
@@ -30,7 +29,6 @@
     <DebugType>none</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -43,19 +41,34 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>none</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);SQLITE_STANDARD</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Mono.Data.Sqlite">
-      <HintPath>.\Mono.Data.Sqlite.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -68,98 +81,10 @@
     <Compile Include="Game\AI\CardSelector.cs" />
     <Compile Include="Game\AI\DeckAttribute.cs" />
     <Compile Include="Game\AI\DecksManager.cs" />
-    <Compile Include="Game\AI\Decks\BE2025.cs" />
-    <Compile Include="Game\AI\Decks\MalissExecutor.cs" />
-    <Compile Include="Game\AI\Decks\RyzealExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ApophisExecutor.cs" />
-    <Compile Include="Game\AI\Decks\AlbazExecutor.cs" />
-    <Compile Include="Game\AI\Decks\AltergeistExecutor.cs" />
-    <Compile Include="Game\AI\Decks\BraveExecutor.cs" />
-    <Compile Include="Game\AI\Decks\FamiliarPossessedExecutor.cs" />
-    <Compile Include="Game\AI\Decks\BlackwingExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ExosisterExecutor.cs" />
-    <Compile Include="Game\AI\Decks\KashtiraExecutor.cs" />
-    <Compile Include="Game\AI\Decks\LuckyExecutor.cs" />
-    <Compile Include="Game\AI\Decks\MathMechExecutor.cs" />
-    <Compile Include="Game\AI\Decks\PureWindsExecutor.cs" />
-    <Compile Include="Game\AI\Decks\DragunExecutor.cs" />
-    <Compile Include="Game\AI\Decks\Level8Executor.cs" />
-    <Compile Include="Game\AI\Decks\SalamangreatExecutor.cs" />
-    <Compile Include="Game\AI\Decks\CyberDragonExecutor.cs" />
-    <Compile Include="Game\AI\Decks\DarkMagicianExecutor.cs" />
-    <Compile Include="Game\AI\Decks\DogmatikaExecutor.cs" />
-    <Compile Include="Game\AI\Decks\OrcustExecutor.cs" />
-    <Compile Include="Game\AI\Decks\SkyStrikerExecutor.cs" />
-    <Compile Include="Game\AI\Decks\MalissOCGExecutor.cs" />
-    <Compile Include="Game\AI\Decks\MokeyMokeyKingExecutor.cs" />
-    <Compile Include="Game\AI\Decks\MokeyMokeyExecutor.cs" />
-    <Compile Include="Game\AI\Decks\TearlamentsExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ThunderDragonExecutor.cs" />
-    <Compile Include="Game\AI\Decks\TimeThiefExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ToadallyAwesomeExecutor.cs" />
-    <Compile Include="Game\AI\Decks\NekoExecutor.cs" />
-    <Compile Include="Game\AI\Decks\NekrozExecutor.cs" />
-    <Compile Include="Game\AI\Decks\GravekeeperExecutor.cs" />
-    <Compile Include="Game\AI\Decks\RainbowExecutor.cs" />
-    <Compile Include="Game\AI\Decks\BlueEyesExecutor.cs" />
-    <Compile Include="Game\AI\Decks\BlueEyesMaxDragonExecutor.cs" />
-    <Compile Include="Game\AI\Decks\BurnExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ChainBurnExecutor.cs" />
-    <Compile Include="Game\AI\Decks\EvilswarmExecutor.cs" />
-    <Compile Include="Game\AI\Decks\GraydleExecutor.cs" />
-    <Compile Include="Game\AI\Decks\GrenMajuThunderBoarderExecutor.cs" />
-    <Compile Include="Game\AI\Decks\LightswornExecutor.cs" />
-    <Compile Include="Game\AI\Decks\LabrynthExecutor.cs" />
-    <Compile Include="Game\AI\Decks\LightswornShaddoldinosourExecutor.cs" />
-    <Compile Include="Game\AI\Decks\PhantasmExecutor.cs" />
-    <Compile Include="Game\AI\Decks\QliphortExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ST1732Executor.cs" />
-    <Compile Include="Game\AI\Decks\SuperheavySamuraiExecutor.cs" />
-    <Compile Include="Game\AI\Decks\SwordsoulExecutor.cs" />
-    <Compile Include="Game\AI\Decks\TrickstarExecutor.cs" />
-    <Compile Include="Game\AI\Decks\WitchcraftExecutor.cs" />
-    <Compile Include="Game\AI\Decks\YosenjuExecutor.cs" />
-    <Compile Include="Game\AI\Decks\YugiExecutor.cs" />
-    <Compile Include="Game\AI\Decks\DragunityExecutor.cs" />
-    <Compile Include="Game\AI\Decks\FrogExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HorusExecutor.cs" />
-    <Compile Include="Game\AI\Decks\DoEveryThingExecutor.cs" />
-    <Compile Include="Game\AI\Decks\OldSchoolExecutor.cs" />
-    <Compile Include="Game\AI\Decks\Rank5Executor.cs" />
-    <Compile Include="Game\AI\Decks\YubelExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ZefraExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ZoodiacExecutor.cs" />
-    <Compile Include="Game\AI\Decks\ZexalWeaponsExecutor.cs" />
-    <Compile Include="Game\AI\Decks\AutoChessExecutor.cs" />
-    <Compile Include="Game\AI\Decks\JTPExecutor.cs" />
-    <Compile Include="Game\AI\Decks\EdisonBlackwingExecutor.cs" />
-    <Compile Include="Game\AI\Decks\EdisonLightswornExecutor.cs" />
-    <Compile Include="Game\AI\Decks\EdisonMachinaExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenHordeExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenVampiresExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenHauntedExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenSkeletonsExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenGravekeepersExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenWitchesExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenArchfiendsExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenLichExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenPilotDarkWorldExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenPilotCursedGardenExecutor.cs" />
-    <Compile Include="Game\AI\Decks\HalloweenPilotNecromancerExecutor.cs" />
+    <Compile Include="Game\AI\Decks\*.cs" />
     <Compile Include="Game\AI\DefaultExecutor.cs" />
     <Compile Include="Game\AI\Dialogs.cs" />
-    <Compile Include="Game\AI\Enums\DangerousMonster.cs" />
-    <Compile Include="Game\AI\Enums\FusionSpell.cs" />
-    <Compile Include="Game\AI\Enums\NotBeSynchroMaterialMonster.cs" />
-    <Compile Include="Game\AI\Enums\NotBeXyzMaterialMonster.cs" />
-    <Compile Include="Game\AI\Enums\ShouldBeDisabledBeforeItUseEffectMonster.cs" />
-    <Compile Include="Game\AI\Enums\ShouldNotBeSpellTarget.cs" />
-    <Compile Include="Game\AI\Enums\ShouldNotBeMonsterTarget.cs" />
-    <Compile Include="Game\AI\Enums\ShouldNotBeTarget.cs" />
-    <Compile Include="Game\AI\Enums\PreventActivationEffectInBattle.cs" />
-    <Compile Include="Game\AI\Enums\OneForXyz.cs" />
-    <Compile Include="Game\AI\Enums\InvincibleMonster.cs" />
-    <Compile Include="Game\AI\Enums\Floodgate.cs" />
+    <Compile Include="Game\AI\Enums\*.cs" />
     <Compile Include="Game\AI\Executor.cs" />
     <Compile Include="Game\AI\HintMsg.cs" />
     <Compile Include="Game\AI\Opcodes.cs" />
@@ -184,6 +109,44 @@
     <Compile Include="ServerModeHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindBotInfo.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLite3.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLite3_UTF16.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteBase.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteCommandBuilder.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteConnectionPool.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteConnectionStringBuilder.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteConvert.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteDataAdapter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteDataReader.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SqliteDataSourceEnumerator.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteEnlistment.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteException.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteFactory.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteFunction.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteFunctionAttribute.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteKeyReader.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteMetaDataCollectionNames.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteParameter.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteParameterCollection.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteStatement.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SQLiteTransaction.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\SR.Designer.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\UnsafeNativeMethods.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\LINQ\SQLiteConnection_Linq.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\Mono.Data.Sqlite_2.0\LINQ\SQLiteFactory_Linq.cs" />
+    <Compile Include="ThirdParty\Mono.Data.Sqlite\MonoPInvokeCallbackAttribute.cs" />
     <Compile Include="YGOSharp.Network\BinaryClient.cs" />
     <Compile Include="YGOSharp.Network\Enums\CtosMessage.cs" />
     <Compile Include="YGOSharp.Network\Enums\GameState.cs" />
@@ -215,9 +178,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="sqlite3.dll">
+    <Content Include="ThirdParty\sqlite\x86\sqlite3.dll">
+      <TargetPath>x86\sqlite3.dll</TargetPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="ThirdParty\sqlite\x64\sqlite3.dll">
+      <TargetPath>x64\sqlite3.dll</TargetPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="ThirdParty\Mono.Data.Sqlite\resources\SR.resx">
+      <LogicalName>SR.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="bots.json">
@@ -240,7 +211,7 @@
     <Content Include="WindBot.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

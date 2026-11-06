@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using WindBot.Game.AI;
 using YGOSharp.Network;
 
 namespace WindBot
@@ -36,7 +37,7 @@ namespace WindBot
                 {
                     if (Debugger.IsAttached)
                         throw;
-                    Logger.WriteErrorLine("Accept Socket Error: " + ex);
+                    Logger.WriteErrorLine("Accept Socket Error", ex);
                 }
             }
         }
@@ -57,6 +58,12 @@ namespace WindBot
                 parseInfoCallback(rawUrl, out info, out port);
                 if (info == null)
                     info = new WindBotInfo();
+
+                if (info.Deck != null && !DecksManager.HasDeck(info.Deck))
+                {
+                    WriteHttpResponse(socket, 404, "Not Found", "");
+                    return;
+                }
 
                 string upgradeHeader = GetHeader(headers, "upgrade");
                 string connectionHeader = GetHeader(headers, "connection");
@@ -134,7 +141,7 @@ namespace WindBot
                 {
                     if (Debugger.IsAttached)
                         throw;
-                    Logger.WriteErrorLine("Start Thread Error: " + ex);
+                    Logger.WriteErrorLine("Start Thread Error", ex);
                 }
                 WriteHttpResponse(socket, 200, "OK", "");
             }
@@ -142,7 +149,7 @@ namespace WindBot
             {
                 if (Debugger.IsAttached)
                     throw;
-                Logger.WriteErrorLine("Handle Socket Request Error: " + ex);
+                Logger.WriteErrorLine("Handle Socket Request Error", ex);
             }
             finally
             {

@@ -18,12 +18,15 @@
 Windbot.exe
 cards.cdb
 pm2.json
+.log.*
+mono_crash.*.json
 
 # Build results
 
 [Dd]ebug/
 [Rr]elease/
-x64/
+/x86
+/x64
 build/
 [Bb]in/
 [Oo]bj/
