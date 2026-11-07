@@ -15,6 +15,7 @@ namespace WindBot
     {
         internal static Random Rand;
         internal static bool ServerMode;
+        internal static string DecisionLogDir { get; private set; }
 
         internal static void Main(string[] args)
         {
@@ -25,6 +26,13 @@ namespace WindBot
             string databasePath = Config.GetString("DbPath", "cards.cdb");
 
             InitDatas(databasePath);
+
+            DecisionLogDir = Config.GetString("DecisionLogDir", null);
+            if (DecisionLogDir != null && !Path.IsPathRooted(DecisionLogDir))
+            {
+                Logger.WriteErrorLine("DecisionLogDir must be an absolute path, decision logging is off: " + DecisionLogDir, null);
+                DecisionLogDir = null;
+            }
 
             ServerMode = Config.GetBool("ServerMode", false);
 
@@ -85,6 +93,7 @@ namespace WindBot
             Info.Chat = Config.GetBool("Chat", Info.Chat);
             Info.DeckCode = Config.GetString("DeckCode", Info.DeckCode);
             Info.RealIP = Config.GetString("RealIP", Info.RealIP);
+            Info.DecisionLog = Config.GetString("DecisionLog", Info.DecisionLog);
             Run(Info);
         }
 
@@ -130,6 +139,9 @@ namespace WindBot
                 string realIP = queryParams.Get("realip");
                 if (realIP != null)
                     Info.RealIP = realIP;
+                string decisionLog = queryParams.Get("decisionlog");
+                if (decisionLog != null)
+                    Info.DecisionLog = decisionLog;
             });
         }
 
