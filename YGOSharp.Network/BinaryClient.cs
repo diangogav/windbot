@@ -11,6 +11,7 @@ namespace YGOSharp.Network
         public event Action Connected;
         public event Action<Exception> Disconnected;
         public event Action<BinaryReader> PacketReceived;
+        public event Action<byte[]> PacketSent;
 
         protected int MaxPacketLength = 0xFFFF;
         protected int HeaderSize = 2;
@@ -84,6 +85,8 @@ namespace YGOSharp.Network
             {
                 throw new Exception("Tried to send a too large packet");
             }
+
+            PacketSent?.Invoke(packet);
 
             int packetLength = packet.Length;
             if (IsHeaderSizeIncluded) packetLength += HeaderSize;

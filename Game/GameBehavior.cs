@@ -38,6 +38,7 @@ namespace WindBot.Game
         private int _select_hint;
         private GameMessage _lastMessage;
         private int lastDuelResult;
+        private DecisionLog _decisionLog;
 
         public GameBehavior(GameClient game)
         {
@@ -66,6 +67,7 @@ namespace WindBot.Game
             }
             _select_hint = 0;
             lastDuelResult = 2;
+            _decisionLog = DecisionLog.Create(Program.DecisionLogDir, game.DecisionLog, game.Username, game.ExecutorName, _duel, Connection);
         }
 
         public int GetLocalPlayer(int player)
@@ -104,12 +106,24 @@ namespace WindBot.Game
                 GameMessage msg = (GameMessage)packet.ReadByte();
                 Game.SetCurrentSTOCMessage(msg.ToString());
                 if (_messages.ContainsKey(msg))
+                {
+                    if (_decisionLog != null)
+                        _decisionLog.BeginMessage(msg.ToString());
                     _messages[msg](packet);
+                    if (_decisionLog != null)
+                        _decisionLog.EndMessage(packet, 1);
+                }
                 _lastMessage = msg;
                 return;
             }
             if (_packets.ContainsKey(id))
+            {
+                if (_decisionLog != null)
+                    _decisionLog.BeginMessage(id.ToString());
                 _packets[id](packet);
+                if (_decisionLog != null)
+                    _decisionLog.EndMessage(packet, 0);
+            }
         }
 
         private void RegisterPackets()
@@ -519,6 +533,8 @@ namespace WindBot.Game
             {
                 Logger.WriteLine("Duel started: " + _room.Names[0] + " versus " + _room.Names[1]);
             }
+            if (_decisionLog != null)
+                _decisionLog.OnDuelStart();
             _ai.OnStart();
         }
 
@@ -541,6 +557,8 @@ namespace WindBot.Game
             }
             string textResult = (result == 2 ? "Draw" : result == 0 ? "Win" : "Lose");
             Logger.WriteLine("Duel finished against " + otherName + ", result: " + textResult);
+            if (_decisionLog != null)
+                _decisionLog.OnDuelEnd(result);
         }
 
         private void OnDraw(BinaryReader packet)
