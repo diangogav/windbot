@@ -67,7 +67,7 @@ namespace WindBot.Game
             }
             _select_hint = 0;
             lastDuelResult = 2;
-            _decisionLog = DecisionLog.Create(Program.DecisionLogDir, game.DecisionLog, game.Username, game.ExecutorName, _duel, Connection);
+            _decisionLog = DecisionLog.Create(Program.DecisionLogDir, game.DecisionLog, game.Username, game.ExecutorName, _duel, _ai, Connection);
         }
 
         public int GetLocalPlayer(int player)

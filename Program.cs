@@ -4,6 +4,7 @@ using System.Threading;
 using System.Net;
 using System.Web;
 using System.Diagnostics;
+using System.Globalization;
 using WindBot.Game;
 using WindBot.Game.AI;
 using YGOSharp.Network;
@@ -94,6 +95,9 @@ namespace WindBot
             Info.DeckCode = Config.GetString("DeckCode", Info.DeckCode);
             Info.RealIP = Config.GetString("RealIP", Info.RealIP);
             Info.DecisionLog = Config.GetString("DecisionLog", Info.DecisionLog);
+            string explore = Config.GetString("Explore", null);
+            if (explore != null)
+                Info.Explore = ParseExploreRate(explore);
             Run(Info);
         }
 
@@ -142,7 +146,19 @@ namespace WindBot
                 string decisionLog = queryParams.Get("decisionlog");
                 if (decisionLog != null)
                     Info.DecisionLog = decisionLog;
+                string explore = queryParams.Get("explore");
+                if (explore != null)
+                    Info.Explore = ParseExploreRate(explore);
             });
+        }
+
+        private static double ParseExploreRate(string value)
+        {
+            double rate;
+            if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out rate) && rate >= 0 && rate <= 1)
+                return rate;
+            Logger.WriteErrorLine("Explore must be a number between 0 and 1, exploration is off: " + value, null);
+            return 0;
         }
 
         private static void Run(object o)

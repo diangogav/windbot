@@ -18,6 +18,7 @@ namespace WindBot
         public bool Debug { get; set; }
         public bool Chat { get; set; }
         public string DecisionLog { get; set; }
+        public double Explore { get; set; }
         public WindBotInfo()
         {
             Name = "WindBot";
@@ -34,6 +35,7 @@ namespace WindBot
             Debug = false;
             Chat = true;
             DecisionLog = null;
+            Explore = 0;
         }
     }
 }

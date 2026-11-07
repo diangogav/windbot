@@ -23,6 +23,14 @@ namespace WindBot.Game
         private ClientCard _pendingAttackTarget;
         private ISet<ClientCard> _attackersWithInvalidPreselectedTarget = new HashSet<ClientCard>();
 
+        private readonly double _exploreRate;
+        private readonly System.Random _exploreRandom;
+
+        /// <summary>
+        /// Number of decisions answered with a random legal option instead of the executor's choice.
+        /// </summary>
+        public int ExploredDecisionCount { get; private set; }
+
         public GameAI(GameClient game, Duel duel)
         {
             Game = game;
@@ -30,6 +38,21 @@ namespace WindBot.Game
 
             _dialogs = new Dialogs(game);
             _activatedCards = new Dictionary<int, int>();
+
+            _exploreRate = game.ExploreRate;
+            if (_exploreRate > 0)
+                _exploreRandom = new System.Random(System.Guid.NewGuid().GetHashCode());
+        }
+
+        private bool ShouldExplore()
+        {
+            return _exploreRandom != null && _exploreRandom.NextDouble() < _exploreRate;
+        }
+
+        private void MarkExplored()
+        {
+            ClearSelections();
+            ExploredDecisionCount++;
         }
 
         private void CheckSurrender()
@@ -270,6 +293,13 @@ namespace WindBot.Game
             _pendingAttacker = null;
             _pendingAttackTarget = null;
 
+            if (ShouldExplore())
+            {
+                BattlePhaseAction explored = ExploreBattleCmd(battle);
+                if (explored != null)
+                    return explored;
+            }
+
             foreach (CardExecutor exec in Executor.Executors)
             {
                 if (exec.Type == ExecutorType.GoToMainPhase2 && battle.CanMainPhaseTwo && exec.Func()) // check if should enter main phase 2 directly
@@ -348,6 +378,33 @@ namespace WindBot.Game
             _pendingAttacker = null; // don't fall into the preselected attack target logic which can cancel the attack and cause an infinite loop
             _pendingAttackTarget = null;
             return fallbackAction;
+        }
+
+        private BattlePhaseAction ExploreBattleCmd(BattlePhase battle)
+        {
+            List<ClientCard> attackers = battle.AttackableCards
+                .Where(card => !_attackersWithInvalidPreselectedTarget.Contains(card))
+                .ToList();
+            int optionCount = battle.ActivableCards.Count + attackers.Count
+                + (battle.CanMainPhaseTwo ? 1 : 0) + (battle.CanEndPhase ? 1 : 0);
+            if (optionCount == 0)
+                return null;
+
+            int pick = _exploreRandom.Next(optionCount);
+            MarkExplored();
+            if (pick < battle.ActivableCards.Count)
+                return new BattlePhaseAction(BattlePhaseAction.BattleAction.Activate, battle.ActivableCards[pick].ActionIndex);
+            pick -= battle.ActivableCards.Count;
+            if (pick < attackers.Count)
+            {
+                List<ClientCard> defenders = Duel.Fields[1].GetMonsters();
+                ClientCard defender = defenders.Count == 0 ? null : defenders[_exploreRandom.Next(defenders.Count)];
+                return Attack(attackers[pick], defender);
+            }
+            pick -= attackers.Count;
+            if (pick == 0 && battle.CanMainPhaseTwo)
+                return ToMainPhase2();
+            return ToEndPhase();
         }
 
         /// <summary>
@@ -489,6 +546,13 @@ namespace WindBot.Game
         /// <returns>Index of the activated card or -1.</returns>
         public int OnSelectChain(IList<ClientCard> cards, IList<int> descs, IList<bool> forces, int timing = -1)
         {
+            if (!forces.Any(force => force) && ShouldExplore())
+            {
+                int pick = _exploreRandom.Next(cards.Count + 1) - 1;
+                MarkExplored();
+                return pick;
+            }
+
             Executor.OnSelectChain(cards);
             foreach (CardExecutor exec in Executor.Executors)
             {
@@ -569,6 +633,12 @@ namespace WindBot.Game
         /// <returns>True for yes, false for no.</returns>
         public bool OnSelectEffectYn(ClientCard card, int desc)
         {
+            if (ShouldExplore())
+            {
+                MarkExplored();
+                return _exploreRandom.Next(2) == 1;
+            }
+
             foreach (CardExecutor exec in Executor.Executors)
             {
                 if (ShouldExecute(exec, card, ExecutorType.Activate, desc))
@@ -586,6 +656,12 @@ namespace WindBot.Game
         {
             _selectingPendulumSummon = false;
             CheckSurrender();
+            if (ShouldExplore())
+            {
+                MainPhaseAction explored = ExploreIdleCmd(main);
+                if (explored != null)
+                    return explored;
+            }
             foreach (CardExecutor exec in Executor.Executors)
             {
             	if (exec.Type == ExecutorType.GoToEndPhase && main.CanEndPhase && exec.Func()) // check if should enter end phase directly
@@ -664,7 +740,67 @@ namespace WindBot.Game
                 return new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase);
 
             _dialogs.SendEndTurn();
-            return new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase); 
+            return new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase);
+        }
+
+        private MainPhaseAction ExploreIdleCmd(MainPhase main)
+        {
+            List<MainPhaseAction> actions = new List<MainPhaseAction>();
+            List<ClientCard> actionCards = new List<ClientCard>();
+            for (int i = 0; i < main.ActivableCards.Count; ++i)
+            {
+                ClientCard card = main.ActivableCards[i];
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.Activate, card.ActionActivateIndex[main.ActivableDescs[i]]));
+                actionCards.Add(card);
+            }
+            foreach (ClientCard card in main.SummonableCards)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.Summon, card.ActionIndex));
+                actionCards.Add(card);
+            }
+            foreach (ClientCard card in main.SpecialSummonableCards)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.SpSummon, card.ActionIndex));
+                actionCards.Add(card);
+            }
+            foreach (ClientCard card in main.ReposableCards)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.Repos, card.ActionIndex));
+                actionCards.Add(card);
+            }
+            foreach (ClientCard card in main.MonsterSetableCards)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.SetMonster, card.ActionIndex));
+                actionCards.Add(card);
+            }
+            foreach (ClientCard card in main.SpellSetableCards)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.SetSpell, card.ActionIndex));
+                actionCards.Add(card);
+            }
+            if (main.CanBattlePhase)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.ToBattlePhase));
+                actionCards.Add(null);
+            }
+            if (main.CanEndPhase)
+            {
+                actions.Add(new MainPhaseAction(MainPhaseAction.MainAction.ToEndPhase));
+                actionCards.Add(null);
+            }
+            if (actions.Count == 0)
+                return null;
+
+            int pick = _exploreRandom.Next(actions.Count);
+            MarkExplored();
+            MainPhaseAction action = actions[pick];
+            if (action.Action == MainPhaseAction.MainAction.SpSummon)
+            {
+                ClientCard card = actionCards[pick];
+                _selectingPendulumSummon = card.HasType(CardType.Pendulum)
+                    && (card == Executor.Util.GetPZone(0, 0) || card == Executor.Util.GetPZone(0, 1));
+            }
+            return action;
         }
 
         /// <summary>
@@ -674,6 +810,12 @@ namespace WindBot.Game
         /// <returns>Index of the selected option.</returns>
         public int OnSelectOption(IList<int> options)
         {
+            if (options.Count > 0 && ShouldExplore())
+            {
+                MarkExplored();
+                return _exploreRandom.Next(options.Count);
+            }
+
             int selectorSelected = m_option;
             m_option = -1;
 
@@ -1156,6 +1298,12 @@ namespace WindBot.Game
         /// <returns>True for yes, false for no.</returns>
         public bool OnSelectYesNo(int desc)
         {
+            if (ShouldExplore())
+            {
+                MarkExplored();
+                return _exploreRandom.Next(2) == 1;
+            }
+
             int selected = m_yesno;
             m_yesno = -1;
             if (selected != -1)

@@ -21,6 +21,7 @@ namespace WindBot.Game
         private readonly string _botName;
         private readonly string _executorName;
         private readonly Duel _duel;
+        private readonly GameAI _ai;
         private readonly YGOClient _connection;
 
         private StreamWriter _writer;
@@ -33,9 +34,11 @@ namespace WindBot.Game
         private string _prompt;
         private string _header;
         private string _state;
+        private int _exploredAtBegin;
+        private bool _explored;
         private readonly List<string> _responses = new List<string>();
 
-        public static DecisionLog Create(string directory, string name, string botName, string executorName, Duel duel, YGOClient connection)
+        public static DecisionLog Create(string directory, string name, string botName, string executorName, Duel duel, GameAI ai, YGOClient connection)
         {
             if (string.IsNullOrEmpty(directory) || name == null)
                 return null;
@@ -44,15 +47,16 @@ namespace WindBot.Game
                 Logger.WriteErrorLine("Decision log disabled: invalid name '" + name + "'.", null);
                 return null;
             }
-            return new DecisionLog(Path.Combine(directory, name + ".jsonl"), botName, executorName, duel, connection);
+            return new DecisionLog(Path.Combine(directory, name + ".jsonl"), botName, executorName, duel, ai, connection);
         }
 
-        private DecisionLog(string path, string botName, string executorName, Duel duel, YGOClient connection)
+        private DecisionLog(string path, string botName, string executorName, Duel duel, GameAI ai, YGOClient connection)
         {
             _path = path;
             _botName = botName;
             _executorName = executorName;
             _duel = duel;
+            _ai = ai;
             _connection = connection;
             _connection.PacketSent += OnPacketSent;
             _connection.Disconnected += OnDisconnected;
@@ -101,6 +105,8 @@ namespace WindBot.Game
                 _responses.Clear();
                 _header = null;
                 _state = null;
+                _explored = false;
+                _exploredAtBegin = _ai.ExploredDecisionCount;
                 _capturing = true;
             }
             catch (Exception ex)
@@ -126,6 +132,8 @@ namespace WindBot.Game
                 line.Append(",\"seq\":").Append(Int(_seq));
                 line.Append(_header);
                 line.Append(",\"prompt\":").Append(Str(_prompt));
+                if (_explored)
+                    line.Append(",\"explored\":true");
                 line.Append(",\"promptBytes\":").Append(Str(Convert.ToBase64String(message, promptOffset, message.Length - promptOffset)));
                 line.Append(",\"responses\":[");
                 for (int i = 0; i < _responses.Count; ++i)
@@ -162,7 +170,10 @@ namespace WindBot.Game
                 // The state is captured at the first answer only, so messages that ask
                 // nothing cost no snapshot; the handler may already have revealed candidates.
                 if (_state == null)
+                {
                     TakeSnapshot();
+                    _explored = _ai.ExploredDecisionCount != _exploredAtBegin;
+                }
                 _responses.Add("{\"ctos\":" + Str(id.ToString()) + ",\"bytes\":"
                     + Str(Convert.ToBase64String(packet, 1, packet.Length - 1)) + "}");
             }
