@@ -99,7 +99,8 @@ namespace WindBot.Game
             {
                 _prompt = prompt;
                 _responses.Clear();
-                TakeSnapshot();
+                _header = null;
+                _state = null;
                 _capturing = true;
             }
             catch (Exception ex)
@@ -158,6 +159,10 @@ namespace WindBot.Game
                 CtosMessage id = (CtosMessage)packet[0];
                 if (id != CtosMessage.Response && id != CtosMessage.HandResult && id != CtosMessage.TpResult)
                     return;
+                // The state is captured at the first answer only, so messages that ask
+                // nothing cost no snapshot; the handler may already have revealed candidates.
+                if (_state == null)
+                    TakeSnapshot();
                 _responses.Add("{\"ctos\":" + Str(id.ToString()) + ",\"bytes\":"
                     + Str(Convert.ToBase64String(packet, 1, packet.Length - 1)) + "}");
             }
@@ -207,7 +212,7 @@ namespace WindBot.Game
             sb.Append(",\"opponent\":");
             AppendSide(sb, _duel.Fields[1]);
             sb.Append(",\"chain\":[");
-            for (int i = 0; i < _duel.CurrentChain.Count; ++i)
+            for (int i = 0; i < CountOf(_duel.CurrentChain); ++i)
             {
                 ClientCard card = _duel.CurrentChain[i];
                 if (i > 0)
@@ -222,7 +227,7 @@ namespace WindBot.Game
         {
             sb.Append("{\"hand\":");
             AppendIds(sb, field.Hand);
-            sb.Append(",\"handCount\":").Append(Int(field.Hand.Count));
+            sb.Append(",\"handCount\":").Append(Int(CountOf(field.Hand)));
             sb.Append(",\"monsters\":");
             AppendZone(sb, field.MonsterZone);
             sb.Append(",\"spells\":");
@@ -231,15 +236,22 @@ namespace WindBot.Game
             AppendIds(sb, field.Graveyard);
             sb.Append(",\"banished\":");
             AppendIds(sb, field.Banished);
-            sb.Append(",\"deckCount\":").Append(Int(field.Deck.Count));
-            sb.Append(",\"extraCount\":").Append(Int(field.ExtraDeck.Count));
+            sb.Append(",\"deckCount\":").Append(Int(CountOf(field.Deck)));
+            sb.Append(",\"extraCount\":").Append(Int(CountOf(field.ExtraDeck)));
             sb.Append('}');
         }
 
+        private static int CountOf<T>(ICollection<T> cards)
+        {
+            return cards == null ? 0 : cards.Count;
+        }
+
+        // Zones and lists are created when a duel starts, so a prompt that arrives
+        // before that (rock-paper-scissors, turn order) sees them as empty.
         private static void AppendIds(StringBuilder sb, IList<ClientCard> cards)
         {
             sb.Append('[');
-            for (int i = 0; i < cards.Count; ++i)
+            for (int i = 0; i < CountOf(cards); ++i)
             {
                 if (i > 0)
                     sb.Append(',');
@@ -251,7 +263,7 @@ namespace WindBot.Game
         private static void AppendZone(StringBuilder sb, ClientCard[] zone)
         {
             sb.Append('[');
-            for (int i = 0; i < zone.Length; ++i)
+            for (int i = 0; zone != null && i < zone.Length; ++i)
             {
                 if (i > 0)
                     sb.Append(',');
