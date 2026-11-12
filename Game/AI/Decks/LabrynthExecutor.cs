@@ -145,48 +145,48 @@ namespace WindBot.Game.AI.Decks
         }
 
         const int SetcodeTimeLord = 0x4a;
-        const int SetcodePhantom = 0xdb;
-        const int SetcodeOrcust = 0x11b;
-        const int SetcodeUnchained = 0x130;
-        const int SetcodeLabrynth = 0x17e;
-        const int SetcodeHorus = 0x19d;
-        const int hintTimingMainEnd = 0x4;
-        const int hintBattleStart = 0x8;
+        protected const int SetcodePhantom = 0xdb;
+        protected const int SetcodeOrcust = 0x11b;
+        protected const int SetcodeUnchained = 0x130;
+        protected const int SetcodeLabrynth = 0x17e;
+        protected const int SetcodeHorus = 0x19d;
+        protected const int hintTimingMainEnd = 0x4;
+        protected const int hintBattleStart = 0x8;
 
-        List<int> notToNegateIdList = new List<int>{
+        protected List<int> notToNegateIdList = new List<int>{
             58699500, 20343502
         };
-        List<int> notToBeTrapTargetList = new List<int>{
+        protected List<int> notToBeTrapTargetList = new List<int>{
             72144675, 86188410, 41589166, 11443677, 72566043, 1688285, 59071624, 6511113, 48183890, 952523, 22423493, 73639099
         };
-        List<int> targetNegateIdList = new List<int> {
+        protected List<int> targetNegateIdList = new List<int> {
             _CardId.EffectVeiler, _CardId.InfiniteImpermanence, CardId.GhostMournerMoonlitChill, _CardId.BreakthroughSkill, 74003290, 67037924,
             9753964, 66192538, 23204029, 73445448, 35103106, 30286474, 45002991, 5795980, 38511382, 53742162, 30430448
         };
-        List<int> notToDestroySpellTrap = new List<int> { 50005218, 6767771 };
+        protected List<int> notToDestroySpellTrap = new List<int> { 50005218, 6767771 };
 
-        List<int> infiniteImpermanenceList = new List<int>();
-        bool summoned = false;
-        List<int> activatedCardIdList = new List<int>();
-        List<ClientCard> currentNegateMonsterList = new List<ClientCard>();
-        List<ClientCard> currentDestroyCardList = new List<ClientCard>();
-        List<ClientCard> setTrapThisTurn = new List<ClientCard>();
-        List<ClientCard> summonThisTurn = new List<ClientCard>();
-        List<ClientCard> enemySetThisTurn = new List<ClientCard>();
-        List<ClientCard> escapeTargetList = new List<ClientCard>();
-        List<ClientCard> summonInChainList = new List<ClientCard>();
-        bool cooclockAffected = false;
-        bool cooclockActivating = false;
-        bool furnitureActivating = false;
-        bool dimensionBarrierAnnouncing = false;
-        int banSpSummonExceptFiendCount = 0;
-        int enemySpSummonFromExLastTurn = 0;
-        int enemySpSummonFromExThisTurn = 0;
-        bool enemyActivateInfiniteImpermanenceFromHand = false;
-        int rollbackCopyCardId = 0;
-        List<int> dimensionalBarrierAnnouced = new List<int>();
-        List<int> chainSummoningIdList = new List<int>(3);
-        ClientCard bigwelcomeEscaseTarget = null;
+        protected List<int> infiniteImpermanenceList = new List<int>();
+        protected bool summoned = false;
+        protected List<int> activatedCardIdList = new List<int>();
+        protected List<ClientCard> currentNegateMonsterList = new List<ClientCard>();
+        protected List<ClientCard> currentDestroyCardList = new List<ClientCard>();
+        protected List<ClientCard> setTrapThisTurn = new List<ClientCard>();
+        protected List<ClientCard> summonThisTurn = new List<ClientCard>();
+        protected List<ClientCard> enemySetThisTurn = new List<ClientCard>();
+        protected List<ClientCard> escapeTargetList = new List<ClientCard>();
+        protected List<ClientCard> summonInChainList = new List<ClientCard>();
+        protected bool cooclockAffected = false;
+        protected bool cooclockActivating = false;
+        protected bool furnitureActivating = false;
+        protected bool dimensionBarrierAnnouncing = false;
+        protected int banSpSummonExceptFiendCount = 0;
+        protected int enemySpSummonFromExLastTurn = 0;
+        protected int enemySpSummonFromExThisTurn = 0;
+        protected bool enemyActivateInfiniteImpermanenceFromHand = false;
+        protected int rollbackCopyCardId = 0;
+        protected List<int> dimensionalBarrierAnnouced = new List<int>();
+        protected List<int> chainSummoningIdList = new List<int>(3);
+        protected ClientCard bigwelcomeEscaseTarget = null;
 
         public ClientCard GetProblematicEnemyMonster(int attack = 0, bool canBeTarget = false, bool ignoreCurrentDestroy = false, CardType selfType = 0)
         {
@@ -2300,7 +2300,7 @@ namespace WindBot.Game.AI.Decks
             return false;
         }
 
-        public ClientCard FurnitureGetCost(bool force = false, List<ClientCard> ignoreList = null)
+        public virtual ClientCard FurnitureGetCost(bool force = false, List<ClientCard> ignoreList = null)
         {
             if (ignoreList == null) ignoreList = new List<ClientCard>();
             // advance cost
@@ -2821,7 +2821,7 @@ namespace WindBot.Game.AI.Decks
         {
             return DestructiveDarumaKarmaCannonActivateCheck(true);
         }
-        public bool DestructiveDarumaKarmaCannonActivateCheck(bool noSelect = false)
+        public virtual bool DestructiveDarumaKarmaCannonActivateCheck(bool noSelect = false)
         {
             bool becomeTarget = Card.Location == CardLocation.SpellZone && DefaultOnBecomeTarget();
             bool activateFlag = becomeTarget && Util.IsOneEnemyBetter(true);

@@ -602,8 +602,11 @@ namespace WindBot.Game.AI.Decks
 
         // Synchro materials: among the combinations that hit the exact Level,
         // spend the one with the lowest combined ATK so the real beaters stay.
-        public override IList<ClientCard> OnSelectSynchroMaterial(IList<ClientCard> cards, int sum, int min, int max)
+        public override IList<ClientCard> OnSelectSynchroMaterial(IList<ClientCard> cards,
+            IList<ClientCard> mandatoryCards, int sum, int min, int max)
         {
+            if (sum > 0)
+                sum -= mandatoryCards.Sum(card => card.OpParam1);
             if (sum <= 0)
                 return null;
             List<ClientCard> best = null;
