@@ -995,8 +995,11 @@ namespace WindBot.Game.AI.Decks
         // that hit the Level. Tytannial and Synchro monsters go last;
         // Botanical Girl and Dandylion are cheap because they replace
         // themselves.
-        public override IList<ClientCard> OnSelectSynchroMaterial(IList<ClientCard> cards, int sum, int min, int max)
+        public override IList<ClientCard> OnSelectSynchroMaterial(IList<ClientCard> cards,
+            IList<ClientCard> mandatoryCards, int sum, int min, int max)
         {
+            if (sum > 0)
+                sum -= mandatoryCards.Sum(card => card.OpParam1);
             if (sum <= 0)
             {
                 if (plannedSynchro != null && plannedSynchro.Tuner != null && cards.Contains(plannedSynchro.Tuner))

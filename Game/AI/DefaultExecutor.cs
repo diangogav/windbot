@@ -259,9 +259,7 @@ namespace WindBot.Game.AI
             public const int DiabellzeOfTheOriginalSin = 53765052;
             public const int PotOfExtravagance = 49238328;
 
-            public const int MirrorForce = 44095762;
             public const int MagicCylinder = 62279055;
-            public const int SakuretsuArmor = 56120475;
             public const int NegateAttack = 14315573;
             public const int DimensionWall = 67095270;
             public const int DrainingShield = 43250041;
@@ -940,7 +938,6 @@ namespace WindBot.Game.AI
 
         public override void OnChainEnd()
         {
-            lightningStormOption = -1;
             chainLinkPlayers.Clear();
             chainLinkTargetStart.Clear();
             base.OnChainEnd();
