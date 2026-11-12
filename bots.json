@@ -354,6 +354,11 @@
         "name": "诺玛·林斯科特",
         "deck": "MathMech",
         "dialog": "wof-Norma-Linscott"
+      },
+      {
+        "name": "Blitzclique",
+        "deck": "Blitzclique",
+        "dialog": "default"
       }
     ]
 }
