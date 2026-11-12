@@ -359,6 +359,11 @@
         "name": "Blitzclique",
         "deck": "Blitzclique",
         "dialog": "default"
+      },
+      {
+        "name": "DarkTimeWiz",
+        "deck": "DarkTimeWizard",
+        "dialog": "default"
       }
     ]
 }
