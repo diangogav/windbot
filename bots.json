@@ -364,6 +364,11 @@
         "name": "DarkTimeWiz",
         "deck": "DarkTimeWizard",
         "dialog": "default"
+      },
+      {
+        "name": "LabrynthGen",
+        "deck": "LabrynthGenesys",
+        "dialog": "default"
       }
     ]
 }
